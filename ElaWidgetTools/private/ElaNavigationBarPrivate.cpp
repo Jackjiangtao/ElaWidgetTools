@@ -107,7 +107,7 @@ void ElaNavigationBarPrivate::onTreeViewClicked(const QModelIndex& index, bool i
                     }
                     routeData.insert("ElaBackPageKey", backPageKey);
                     routeData.insert("ElaForwardPageKey", node->getNodeKey());
-                    ElaNavigationRouter::getInstance()->navigationRoute(this, "onNavigationRoute", routeData);
+                    ElaNavigationRouter::getInstance()->navigationRoute(q->window(), this, "onNavigationRoute", routeData);
                 }
                 Q_EMIT q->navigationNodeClicked(ElaNavigationType::PageNode, node->getNodeKey(), isRouteBack);
 

@@ -4,7 +4,8 @@
 
 Q_SINGLETON_CREATE_CPP(ElaNavigationRouter)
 Q_PROPERTY_CREATE_Q_CPP(ElaNavigationRouter, int, MaxRouteCount)
-ElaNavigationRouter::ElaNavigationRouter(QObject* parent)
+
+ElaNavigationRouter::ElaNavigationRouter(QObject *parent)
     : QObject{parent}, d_ptr(new ElaNavigationRouterPrivate())
 {
     Q_D(ElaNavigationRouter);
@@ -16,7 +17,7 @@ ElaNavigationRouter::~ElaNavigationRouter()
 {
 }
 
-ElaNavigationRouterType::NavigationRouteType ElaNavigationRouter::navigationRoute(QObject* routeObject, QString routeFunctionName, const QVariantMap& routeData, Qt::ConnectionType connectionType)
+ElaNavigationRouterType::NavigationRouteType ElaNavigationRouter::navigationRoute(QObject *routeObject, QString routeFunctionName, const QVariantMap& routeData, Qt::ConnectionType connectionType)
 {
     Q_D(ElaNavigationRouter);
     if (!routeObject)
@@ -93,7 +94,7 @@ void ElaNavigationRouter::navigationRouteBack()
     }
     QVariantMap routeSaveData = d->_routeList[d->_currentIndex];
     d->_currentIndex -= 1;
-    QObject* routeObject = routeSaveData.value("ElaRouteObject").value<QObject*>();
+    QObject *routeObject = routeSaveData.value("ElaRouteObject").value<QObject*>();
     QString routeFunctionName = routeSaveData.value("ElaRouteFunctionName").toString();
     QVariantMap routeData = routeSaveData.value("ElaRouteData").toMap();
     routeData.insert("ElaRouteBackMode", true);
@@ -121,7 +122,132 @@ void ElaNavigationRouter::navigationRouteForward()
         d->_currentIndex += 1;
     }
     QVariantMap routeSaveData = d->_routeList[d->_currentIndex];
-    QObject* routeObject = routeSaveData.value("ElaRouteObject").value<QObject*>();
+    QObject *routeObject = routeSaveData.value("ElaRouteObject").value<QObject*>();
+    QString routeFunctionName = routeSaveData.value("ElaRouteFunctionName").toString();
+    QVariantMap routeData = routeSaveData.value("ElaRouteData").toMap();
+    routeData.insert("ElaRouteBackMode", false);
+    Qt::ConnectionType connectionType = routeSaveData.value("ElaRouteConnectionType").value<Qt::ConnectionType>();
+    QMetaObject::invokeMethod(routeObject, routeFunctionName.toLocal8Bit().constData(), connectionType, Q_ARG(QVariantMap, routeData));
+}
+
+ElaNavigationRouterType::NavigationRouteType ElaNavigationRouter::navigationRoute(QObject *context, QObject *routeObject, QString routeFunctionName, const QVariantMap& routeData, Qt::ConnectionType connectionType)
+{
+    Q_D(ElaNavigationRouter);
+    if (!routeObject)
+    {
+        return ElaNavigationRouterType::ObjectInvalid;
+    }
+    if (routeFunctionName.isEmpty())
+    {
+        return ElaNavigationRouterType::FunctionNameInvalid;
+    }
+    auto& ctx = d->_contextMap[context];
+    if (ctx.routeList.count() == 0)
+    {
+        Q_EMIT windowRouterStateChanged(context, ElaNavigationRouterType::BackValid);
+        Q_EMIT windowRouterStateChanged(context, ElaNavigationRouterType::ForwardInvalid);
+    }
+    else
+    {
+        if (ctx.routeList.count() >= d->_pMaxRouteCount)
+        {
+            ctx.routeList.removeFirst();
+            ctx.currentIndex -= 1;
+        }
+    }
+    QVariantMap saveData;
+    saveData.insert("ElaRouteObject", QVariant::fromValue<QObject*>(routeObject));
+    saveData.insert("ElaRouteFunctionName", routeFunctionName);
+    saveData.insert("ElaRouteData", routeData);
+    saveData.insert("ElaRouteConnectionType", QVariant::fromValue<Qt::ConnectionType>(connectionType));
+    if (ctx.currentIndex != ctx.routeList.count() - 1)
+    {
+        if (ctx.currentIndex == -1)
+        {
+            ctx.routeList.clear();
+        }
+        else
+        {
+            ctx.routeList.remove(ctx.currentIndex + 1, ctx.routeList.count() - ctx.currentIndex - 1);
+        }
+        Q_EMIT windowRouterStateChanged(context, ElaNavigationRouterType::ForwardInvalid);
+    }
+    if (ctx.currentIndex <= 0)
+    {
+        Q_EMIT windowRouterStateChanged(context, ElaNavigationRouterType::BackValid);
+        Q_EMIT windowRouterStateChanged(context, ElaNavigationRouterType::ForwardInvalid);
+    }
+    ctx.routeList.append(saveData);
+    ctx.currentIndex = ctx.routeList.count() - 1;
+    return ElaNavigationRouterType::Success;
+}
+
+void ElaNavigationRouter::clearNavigationRoute(QObject *context)
+{
+    Q_D(ElaNavigationRouter);
+    auto& ctx = d->_contextMap[context];
+    ctx.currentIndex = -1;
+    ctx.routeList.clear();
+    Q_EMIT windowRouterStateChanged(context, ElaNavigationRouterType::BackInvalid);
+    Q_EMIT windowRouterStateChanged(context, ElaNavigationRouterType::ForwardValid);
+}
+
+void ElaNavigationRouter::navigationRouteBack(QObject *context)
+{
+    Q_D(ElaNavigationRouter);
+    if (!d->_contextMap.contains(context))
+    {
+        return;
+    }
+    auto& ctx = d->_contextMap[context];
+    if (ctx.routeList.isEmpty())
+    {
+        return;
+    }
+    if (ctx.currentIndex == 0)
+    {
+        Q_EMIT windowRouterStateChanged(context, ElaNavigationRouterType::BackInvalid);
+    }
+    if (ctx.currentIndex == ctx.routeList.size() - 1)
+    {
+        Q_EMIT windowRouterStateChanged(context, ElaNavigationRouterType::ForwardValid);
+    }
+    QVariantMap routeSaveData = ctx.routeList[ctx.currentIndex];
+    ctx.currentIndex -= 1;
+    QObject *routeObject = routeSaveData.value("ElaRouteObject").value<QObject*>();
+    QString routeFunctionName = routeSaveData.value("ElaRouteFunctionName").toString();
+    QVariantMap routeData = routeSaveData.value("ElaRouteData").toMap();
+    routeData.insert("ElaRouteBackMode", true);
+    Qt::ConnectionType connectionType = routeSaveData.value("ElaRouteConnectionType").value<Qt::ConnectionType>();
+    QMetaObject::invokeMethod(routeObject, routeFunctionName.toLocal8Bit().constData(), connectionType, Q_ARG(QVariantMap, routeData));
+}
+
+void ElaNavigationRouter::navigationRouteForward(QObject *context)
+{
+    Q_D(ElaNavigationRouter);
+    if (!d->_contextMap.contains(context))
+    {
+        return;
+    }
+    auto& ctx = d->_contextMap[context];
+    if (ctx.routeList.isEmpty())
+    {
+        return;
+    }
+    if (ctx.currentIndex <= 0)
+    {
+        Q_EMIT windowRouterStateChanged(context, ElaNavigationRouterType::BackValid);
+    }
+    if (ctx.currentIndex == ctx.routeList.size() - 2)
+    {
+        Q_EMIT windowRouterStateChanged(context, ElaNavigationRouterType::ForwardInvalid);
+    }
+    if (ctx.currentIndex < ctx.routeList.size() - 1)
+    {
+        ctx.currentIndex += 1;
+    }
+    QVariantMap routeSaveData = ctx.routeList[ctx.currentIndex];
+    QObject *routeObject = routeSaveData.value("ElaRouteObject").value<QObject*>();
     QString routeFunctionName = routeSaveData.value("ElaRouteFunctionName").toString();
     QVariantMap routeData = routeSaveData.value("ElaRouteData").toMap();
     routeData.insert("ElaRouteBackMode", false);

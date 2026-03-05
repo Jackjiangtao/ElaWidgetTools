@@ -1,5 +1,6 @@
 #ifndef ELANAVIGATIONROUTERPRIVATE_H
 #define ELANAVIGATIONROUTERPRIVATE_H
+#include <QMap>
 #include <QObject>
 #include <QVariantMap>
 #include <QVector>
@@ -18,6 +19,13 @@ public:
 private:
     int _currentIndex{-1};
     QVector<QVariantMap> _routeList;
+
+    struct RouteContext
+    {
+        int currentIndex{-1};
+        QVector<QVariantMap> routeList;
+    };
+    QMap<QObject*, RouteContext> _contextMap;
 };
 
 #endif // ELANAVIGATIONROUTERPRIVATE_H

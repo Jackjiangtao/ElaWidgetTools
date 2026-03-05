@@ -33,7 +33,7 @@ ElaScrollPage::ElaScrollPage(QWidget* parent)
             routeData.insert("ElaScrollPageCheckSumKey", "BreadcrumbClicked");
             routeData.insert("ElaBackBreadcrumbList", lastBreadcrumbList);
             routeData.insert("ElaForwardBreadcrumbList", d->_breadcrumbBar->getBreadcrumbList());
-            ElaNavigationRouter::getInstance()->navigationRoute(d, "onNavigationRoute", routeData);
+            ElaNavigationRouter::getInstance()->navigationRoute(window(), d, "onNavigationRoute", routeData);
         }
     });
     d->_pageTitleLayout = new QHBoxLayout();
