@@ -24,10 +24,6 @@ ElaLogPrivate::~ElaLogPrivate()
 
 void ElaLogPrivate::_messageLogHander(QtMsgType type, const QMessageLogContext& ctx, const QString& msg)
 {
-    if (type > QtCriticalMsg)
-    {
-        return;
-    }
     QString logInfo;
     QString logTime = QDateTime::currentDateTime().toString("yyyy-MM-dd hh:mm:ss");
     switch (type)
@@ -47,10 +43,19 @@ void ElaLogPrivate::_messageLogHander(QtMsgType type, const QMessageLogContext& 
         logInfo = QString("[错误-%1](函数: %2 , 行数: %3) -> %4").arg(logTime, ctx.function, QString::number(ctx.line), msg);
         break;
     }
+    case QtInfoMsg:
+    {
+        logInfo = QString("[提示-%1](函数: %2 , 行数: %3) -> %4").arg(logTime, ctx.function, QString::number(ctx.line), msg);
+        break;
+    }
+    case QtFatalMsg:
+    {
+        logInfo = QString("[致命-%1](函数: %2 , 行数: %3) -> %4").arg(logTime, ctx.function, QString::number(ctx.line), msg);
+        break;
+    }
     default:
     {
-        qCritical("发生致命错误！");
-        break;
+        return;
     }
     }
     qDebug() << logInfo;
