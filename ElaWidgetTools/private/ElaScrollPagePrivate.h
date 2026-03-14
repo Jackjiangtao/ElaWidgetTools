@@ -3,6 +3,7 @@
 
 #include <QMap>
 #include <QObject>
+#include <QVariant>
 
 #include "ElaProperty.h"
 class ElaScrollPage;

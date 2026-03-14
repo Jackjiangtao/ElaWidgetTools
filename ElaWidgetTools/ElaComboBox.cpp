@@ -11,6 +11,7 @@
 #include <QListView>
 #include <QMouseEvent>
 #include <QPropertyAnimation>
+#include <QScreen>
 
 Q_PROPERTY_CREATE_Q_CPP(ElaComboBox, int, BorderRadius)
 ElaComboBox::ElaComboBox(QWidget* parent)

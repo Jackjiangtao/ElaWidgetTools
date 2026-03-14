@@ -1,10 +1,11 @@
-﻿#include "ElaApplication.h"
+#include "ElaApplication.h"
 
 #include "ElaTheme.h"
 #include "ElaWinShadowHelper.h"
 #include "private/ElaApplicationPrivate.h"
 #include <QApplication>
 #include <QCursor>
+#include <QDebug>
 #include <QFontDatabase>
 #include <QFontInfo>
 #include <QWidget>

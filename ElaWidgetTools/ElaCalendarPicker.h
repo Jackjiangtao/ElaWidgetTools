@@ -1,6 +1,7 @@
 #ifndef ELACALENDARPICKER_H
 #define ELACALENDARPICKER_H
 
+#include <QDate>
 #include <QPushButton>
 
 #include "ElaProperty.h"

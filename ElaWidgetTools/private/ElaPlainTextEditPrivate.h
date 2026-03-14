@@ -1,7 +1,9 @@
 #ifndef ELAPLAINTEXTEDITPRIVATE_H
 #define ELAPLAINTEXTEDITPRIVATE_H
 
+#include <QMap>
 #include <QObject>
+#include <QVariant>
 
 #include "ElaDef.h"
 class ElaEvent;

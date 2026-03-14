@@ -1,6 +1,7 @@
 #ifndef ELACALENDAR_H
 #define ELACALENDAR_H
 
+#include <QDate>
 #include <QWidget>
 
 #include "ElaProperty.h"

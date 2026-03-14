@@ -1,7 +1,9 @@
 #ifndef ELALINEEDITPRIVATE_H
 #define ELALINEEDITPRIVATE_H
 
+#include <QMap>
 #include <QObject>
+#include <QVariant>
 
 #include "ElaDef.h"
 class ElaEvent;

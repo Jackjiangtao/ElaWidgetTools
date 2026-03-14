@@ -80,7 +80,7 @@ void ElaMessageDialogButton::mouseReleaseEvent(QMouseEvent *event)
 	QWidget::mouseReleaseEvent(event);
 }
 
-void ElaMessageDialogButton::enterEvent(QEnterEvent *event)
+void ElaMessageDialogButton::enterEvent(QEvent *event)
 {
 	_isHovered = true;
 	update();
